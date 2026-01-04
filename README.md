@@ -1,8 +1,6 @@
 # OpenCode Docker Sandbox (oc-docker)
 
-A sandboxed Docker environment for running OpenCode with restricted file and internet access.
-
-Starts Docker an macOS if it's not running.
+A sandboxed Docker environment for running OpenCode with restricted file access and complete data isolation.
 
 Run with 'ocd' ;)
 
@@ -27,10 +25,16 @@ ocd
 ```
 
 This will:
-- Check if Docker is running and start it if needed
-- Launch OpenCode in the sandbox container (named 'oc-docker')
-- Mount your ~/Projects directory at /workspace
+- Auto-start Docker Desktop if it's not running (macOS)
+- Launch OpenCode automatically in the sandbox container
+- Mount your ~/Projects directory at /Projects
 - Load environment variables from .env
+- Persist all OpenCode data (sessions, API keys, config) to ~/.oc_docker
+
+**Interactive Shell Access:**
+- When OpenCode exits (Ctrl+C or exit), you'll get a bash shell prompt
+- You can run commands, restart OpenCode, or exit the container
+- Type `exit` to leave the container and return to your host shell
 
 ## Configuration
 
@@ -47,11 +51,16 @@ Edit `.env` in the oc_docker directory to customize:
 
 ## Features
 
+- ✅ **Auto-start OpenCode** - Launches automatically when container starts
+- ✅ **Interactive shell access** - Drop to shell after OpenCode exits, restart it, or run commands
+- ✅ **Data persistence** - All sessions, API keys, and config saved to `~/.oc_docker` (survives Docker restarts)
+- ✅ **Complete isolation** - Separate from native macOS OpenCode installation (privacy-focused)
+- ✅ **Auto-start Docker** - Automatically starts Docker Desktop on macOS if not running
 - ✅ OpenCode AI installed and ready to use
 - ✅ Python 3.11+ with pip
 - ✅ Node.js 18+
 - ✅ File access restricted to ~/Projects/
 - ✅ Internet access (requires Docker permission)
 - ✅ .env file support for custom configs
-- ✅ Auto-start Docker if not running
 - ✅ Security hardening (dropped capabilities, no-new-privileges)
+- ✅ Custom hostname (oc-docker) for easy identification

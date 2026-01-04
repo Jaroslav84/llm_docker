@@ -7,9 +7,10 @@ services:
     env_file:
       - .env
     volumes:
-      - ~/Projects:/workspace
+      - ~/Projects:/Projects
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    working_dir: /workspace
+      - ~/.oc_docker:/root  # Persist entire /root directory to ensure all OpenCode data (config, sessions, API keys) is saved
+    working_dir: /Projects
     stdin_open: true
     tty: true
     network_mode: host
