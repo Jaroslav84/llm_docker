@@ -31,7 +31,27 @@ if ! docker info > /dev/null 2>&1; then
     echo -e "\nDocker is ready!"
 fi
 
+# Capture current directory before changing to script directory
+CURRENT_DIR=$(pwd)
 cd "$SCRIPT_DIR"
 
-echo "Starting OpenCode sandbox..."
-docker compose run --rm opencode
+# Calculate the working directory inside Docker
+# If current dir is under ~/Projects, map it to /root/Projects/<relative_path>
+PROJECTS_DIR="$HOME/Projects"
+if [[ "$CURRENT_DIR" == "$PROJECTS_DIR"* ]]; then
+    # Get relative path from ~/Projects
+    RELATIVE_PATH="${CURRENT_DIR#$PROJECTS_DIR}"
+    RELATIVE_PATH="${RELATIVE_PATH#/}"  # Remove leading slash if present
+    if [ -z "$RELATIVE_PATH" ]; then
+        DOCKER_WORKDIR="/root/Projects"
+    else
+        DOCKER_WORKDIR="/root/Projects/$RELATIVE_PATH"
+    fi
+else
+    # If outside ~/Projects, default to /root/Projects
+    DOCKER_WORKDIR="/root/Projects"
+    echo "Warning: Current directory is outside ~/Projects, starting in /root/Projects"
+fi
+
+echo "Starting OpenCode sandbox in $DOCKER_WORKDIR..."
+docker compose run --rm -w "$DOCKER_WORKDIR" opencode
