@@ -1,66 +1,112 @@
-# OpenCode Docker Sandbox (oc-docker)
+# oc-docker
 
-A sandboxed Docker environment for running OpenCode with restricted file access and complete data isolation.
+**A secure, sandboxed Docker environment for running OpenCode with complete data isolation and privacy**
 
-Run with 'ocd' ;)
+**How it works:** 
+Run 'ocd' command insitead of 'opencode'. Simple as that.
 
-## Setup
+**oc-docker will automatically:**
+* 🐳 Auto-start Docker Desktop if it's not running (macOS)
+* 🔐 Load API keys from `.env` file
+* ⚙️ Apply OpenCode configuration from `opencode.config.jsonc`
+* 📂 Start in your current directory (mapped to `/root/Projects/...`)
+* 🤖 Launch OpenCode automatically in the isolated environment
+* 💾 Persist all data to `~/.oc_docker` (survives restarts)
 
-1. Build the Docker image:
-   ```bash
-   cd ~/Projects/ai/oc_docker
-   docker compose build
-   ```
+## Setup procedure
 
-2. Install the `ocd` command in your PATH (run manually, requires sudo):
-   ```bash
-   sudo ln -sf ~/Projects/ai/oc_docker/ocd /usr/local/bin/ocd
-   ```
+### 1. Create `.env` File
 
-## Usage
+Create a `.env` file in the oc_docker directory with your API keys and WORKDIR :
 
-Simply type `ocd` in your terminal anywhere:
+```bash
+cat > .env << EOF
+OPENAI_API_KEY=sk-your-openai-key-here
+ZAI_API_KEY=your-zai-key-here
+EOF
+```
+
+### 2. Configure OpenCode Settings
+
+Edit `opencode.config.jsonc` to customize your OpenCode model preferences. 
+
+```jsonc
+{
+  "model": "openai/gpt-5",
+  "small_model": "zai/glm-4.5-flash",
+  "agent": {
+    "build": {
+      "model": "openai/gpt-5"
+    },
+    // ... more agent configurations. I left a 6 agent madness for you ;)
+  }
+}
+```
+
+### 3. Verify Docker Setup
+
+Ensure Docker is installed and accessible:
+
+```bash
+docker --version
+docker compose version
+```
+
+### 4. 🚀 Installation and 'ocd' command setup
+
+```bash
+docker compose build
+sudo ln -sf ./ocd /usr/local/bin/ocd
+```
+
+## ⚡ Running
+
 ```bash
 ocd
 ```
+It will spin up or using exiting docker container and drop you into it's shell, then opencode.
 
-This will:
-- Auto-start Docker Desktop if it's not running (macOS)
-- Launch OpenCode automatically in the sandbox container
-- Mount your ~/Projects directory at /root/Projects
-- Load environment variables from .env
-- Persist all OpenCode data (sessions, API keys, config) to ~/.oc_docker
+## 🏗️ Container Architecture
 
-**Interactive Shell Access:**
-- When OpenCode exits (Ctrl+C or exit), you'll get a bash shell prompt
-- You can run commands, restart OpenCode, or exit the container
-- Type `exit` to leave the container and return to your host shell
+The oc-docker container includes:
 
-## Configuration
+* **Base Image**: `node:18` (with Python 3.11+ support)
+* **OpenCode CLI**: Globally installed via `npm install -g opencode-ai`
+* **Development Tools**: Python, pip, git, curl, wget, vim
+* **Security**: Dropped capabilities, no-new-privileges, restricted file access
+* **Network**: Host mode for seamless connectivity
+* **Volume Mounts**:
+  - `~/Projects` → `/root/Projects` (your projects)
+  - `~/.oc_docker` → `/root` (persistent OpenCode data)
+  - `opencode.config.jsonc` → `/tmp/opencode.config.jsonc` (config file)
 
-Edit `.env` in the oc_docker directory to customize:
-- API keys (e.g., OPENAI_API_KEY)
-- Environment settings
-- Python/Node.js preferences
+## 🔍 Features
 
-## Container
+### ✨ Core Features
 
-- **Image name**: oc-docker:latest
-- **Container name**: oc-docker
-- **OpenCode version**: 1.0.220
+* ✅ **Auto-start OpenCode** - Launches automatically when container starts
+* ✅ **Smart directory detection** - Starts in your current directory
+* ✅ **Interactive shell access** - Drop to shell after OpenCode exits
+* ✅ **Data persistence** - All sessions, API keys, and config saved to `~/.oc_docker`
+* ✅ **Complete isolation** - Separate from native macOS OpenCode (privacy-focused)
+* ✅ **Auto-start Docker** - Automatically starts Docker Desktop on macOS
 
-## Features
+### 🔒 Security Features
 
-- ✅ **Auto-start OpenCode** - Launches automatically when container starts
-- ✅ **Interactive shell access** - Drop to shell after OpenCode exits, restart it, or run commands
-- ✅ **Data persistence** - All sessions, API keys, and config saved to `~/.oc_docker` (survives Docker restarts)
-- ✅ **Complete isolation** - Separate from native macOS OpenCode installation (privacy-focused)
-- ✅ **Auto-start Docker** - Automatically starts Docker Desktop on macOS if not running
-- ✅ OpenCode AI installed and ready to use
-- ✅ Python 3.11+ with pip
-- ✅ Node.js 18+
-- ✅ File access restricted to ~/Projects/
-- ✅ Internet access (requires Docker permission)
-- ✅ .env file support for custom configs
-- ✅ Security hardening (dropped capabilities, no-new-privileges)
-- ✅ Custom hostname (oc-docker) for easy identification
+* ✅ **Restricted file access** - Only `~/Projects` is accessible
+* ✅ **Dropped capabilities** - Minimal container privileges
+* ✅ **No new privileges** - Security hardening enabled
+* ✅ **Isolated data** - OpenCode data completely separate from host
+
+### ⚙️ Configuration Features
+
+* ✅ **Environment variables** - API keys from `.env` file
+* ✅ **Config file support** - JSONC format with comments
+* ✅ **Model customization** - Configure agents and models per your needs
+* ✅ **Custom hostname** - Easy identification (`oc-docker`)
+
+
+## 🚧 Roadmap
+
+* **Server Mode**: Run OpenCode as a server for IDE integration (port 49455)
+
