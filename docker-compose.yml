@@ -7,18 +7,23 @@ services:
     env_file:
       - .env
     volumes:
-      - ~/Projects:/root/Projects
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ~/Projects:${WORKSPACE_DIR:-/root/Projects}
       - ~/.llm_docker/opencode:/root  # Persist entire /root directory for OpenCode data (config, sessions, API keys)
       - ~/.llm_docker/claude:/root_claude  # Persist Claude Code data separately (entrypoint will handle symlinking)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./opencode.config.jsonc:/tmp/opencode.config.jsonc:ro  # Mount OpenCode config file (JSONC with comments)
       - ./docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh:ro # Mount entrypoint for instant updates
-    working_dir: /root/Projects
+    working_dir: ${WORKSPACE_DIR:-/root/Projects}
     stdin_open: true
     tty: true
-    network_mode: host
+    # Network mode: host if INTERNET_ACCESS=true, bridge if INTERNET_ACCESS=false
+    # Set automatically by wrapper scripts (ocd/cld) based on INTERNET_ACCESS from .env
+    network_mode: ${NETWORK_MODE:-host}
     environment:
-      - SANDBOX_MODE=true
+      - NODE_ENV=${NODE_ENV:-development}
+      - SANDBOX_ENABLED=${SANDBOX_ENABLED:-true}
+      - SANDBOX_MODE=${SANDBOX_MODE:-${SANDBOX_ENABLED:-true}}
+      - INTERNET_ACCESS=${INTERNET_ACCESS:-true}
       - TERM=${TERM:-xterm-256color}
       - COLUMNS=${COLUMNS:-80}
       - LINES=${LINES:-24}
@@ -27,5 +32,6 @@ services:
       - ALL
     cap_add:
       - NET_BIND_SERVICE
+      - NET_ADMIN  # Required for iptables rules to block internet when INTERNET_ACCESS=false
     security_opt:
       - no-new-privileges:true

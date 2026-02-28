@@ -73,6 +73,22 @@ fi
 # Ensure TERM is set (default to xterm-256color for iTerm compatibility)
 export TERM=${TERM:-xterm-256color}
 
+# Load .env to get INTERNET_ACCESS and SANDBOX_ENABLED
+if [ -f "$SCRIPT_DIR/.env" ]; then
+    set -a
+    source <(grep -v '^#' "$SCRIPT_DIR/.env" | grep -v '^$' | sed 's/^/export /')
+    set +a
+fi
+
+# Set NETWORK_MODE based on INTERNET_ACCESS
+# If INTERNET_ACCESS=true → host mode (full network access)
+# If INTERNET_ACCESS=false → bridge mode (for internet blocking via iptables)
+if [ "${INTERNET_ACCESS:-true}" = "false" ]; then
+    export NETWORK_MODE=bridge
+else
+    export NETWORK_MODE=host
+fi
+
 docker compose run --rm -w "$DOCKER_WORKDIR" \
     -e TERM \
     -e COLUMNS \

@@ -1,23 +1,21 @@
 # 🐳 llm-docker
 
 ![Version](https://img.shields.io/badge/Version-v1.1-blue?style=for-the-badge)
-![AI Powered](https://img.shields.io/badge/AI-Powered-FF4B4B?style=for-the-badge&logo=openai&logoColor=white)
+![OpenCode](https://img.shields.io/badge/OpenCode-Supported-00A86B?style=for-the-badge&logo=openai&logoColor=white)
 ![Claude Code](https://img.shields.io/badge/Claude_Code-Supported-D1913C?style=for-the-badge&logo=anthropic&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Isolated-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![Security](https://img.shields.io/badge/Security-Sandboxed-8A2BE2?style=for-the-badge&logo=lock&logoColor=white)
 ![Shell](https://img.shields.io/badge/Shell-Automated-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
 
-![llm-docker Logo](llm_docker_logo.png)
+![Logo](logo.png)
 
 ---
 
 ## 📘 About
 
-**llm-docker** provides a secure, sandboxed environment for running **OpenCode** and **Claude Code** with complete data isolation and privacy on macOS.
+**llm-docker** provides a secure, sandboxed environment for running **OpenCode** and **Claude Code** with complete data isolation and privacy.
 
-Stop worrying about local dependencies or data leaks. Run your AI agents in a controlled Docker environment that automatically manages keys, configs, and persistence.
-
-![llm-docker Screenshot](screenshot.png)
+![Screenshot](screenshot.png)
 
 ---
 
@@ -38,22 +36,11 @@ You can use `ocd ./my-path` too with params `ocd ./my-path -c`
 
 ### 1. Create `.env` File
 
-Create a `.env` file in the llm_docker directory with your API keys and settings:
+Create a `.env` file with your API keys:
 
 ```bash
-cat > .env << 'EOF'
-# ============================================
-# OpenCode API Keys
-# ============================================
-OPENAI_API_KEY=sk-your-openai-key-here
-ZAI_API_KEY=your-zai-key-here
-
-# ============================================
-# Claude Code API Keys
-# ============================================
-ANTHROPIC_API_KEY=sk-ant-your-anthropic-key-here
-CLAUDE_CODE_MAX_OUTPUT_TOKENS=48000
-EOF
+cp .env.sample .env
+nano .env
 ```
 
 ### 2. Configure OpenCode Settings
@@ -63,7 +50,7 @@ Edit `opencode.config.jsonc` to customize your OpenCode model preferences.
 ```jsonc
 {
   "model": "openai/gpt-5",
-  "small_model": "zai/glm-4.5-flash",
+  "small_model": "zai/glm-4.7-flash",
   "agent": {
     "build": {
       "model": "openai/gpt-5"
@@ -106,11 +93,15 @@ cld
 ```
 It will spin up or use existing docker container and drop you into its shell, then launch Claude Code.
 
+### Continuing session
+`cld  -c` 
+
+
 ## 🏗️ Container Architecture
 
 The llm-docker container includes:
 
-* **Base Image**: `node:18` (with Python 3.11+ support)
+* **Base Image**: `node:24` (with Python 3.11+ support)
 * **OpenCode CLI**: Globally installed via `npm install -g opencode-ai`
 * **Claude Code CLI**: Globally installed via `npm install -g @anthropic-ai/claude-code`
 * **Development Tools**: Python, pip, git, curl, wget, vim
@@ -119,8 +110,8 @@ The llm-docker container includes:
 * **Volume Mounts**:
   - `~/Projects` → `/root/Projects` (your projects)
   - `~/.llm_docker/opencode` → `/root` (persistent OpenCode data)
-  - `~/.llm_docker/claude` → `/root_claude` (persistent Claude Code data)
-  - `opencode.config.jsonc` → `/tmp/opencode.config.jsonc` (config file)
+  - `~/.llm_docker/claude` → `/root_claude` (persistent Claude Code data, automatically symlinked to `/root` when using docker-compose)
+  - `opencode.config.jsonc` → `/tmp/opencode.config.jsonc` (config file, OpenCode only)
 
 ## 🔍 Features
 
